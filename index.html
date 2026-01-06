@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRAFULL // SYSTEM HANG</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@700&family=Permanent+Marker&family=VT323&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- CORE VARIABLES --- */
+        :root {
+            --neon-green: #0f0;
+            --alert-orange: #ff3300;
+            --dark-bg: #050505;
+            --glass: rgba(20, 20, 20, 0.85);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #fff;
+            overflow-x: hidden;
+            font-family: 'Bebas Neue', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- CRT SCANLINE OVERLAY --- */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1000;
+            animation: scrollLines 10s linear infinite;
+        }
+
+        @keyframes scrollLines {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+
+        /* --- BACKGROUND ANIMATION --- */
+        .bg-chaos {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(15, 255, 0, 0.05) 0%, transparent 60%),
+                repeating-linear-gradient(90deg, #111 0px, #111 1px, transparent 1px, transparent 30px);
+            opacity: 0.6;
+        }
+
+        /* --- MARQUEE --- */
+        .ticker-wrap {
+            width: 100%;
+            background: var(--alert-orange);
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 5px 0;
+            border-bottom: 4px solid #fff;
+            transform: rotate(-1deg) scale(1.02);
+            box-shadow: 0 0 20px var(--alert-orange);
+            position: relative;
+            z-index: 5;
+        }
+
+        .ticker {
+            display: inline-block;
+            animation: marquee 10s linear infinite;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            color: #000;
+            font-size: 1.5rem;
+        }
+
+        @keyframes marquee {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
+        }
+
+        /* --- MAIN CARD --- */
+        .main-card {
+            margin-top: 50px;
+            width: 90%;
+            max-width: 550px;
+            background: var(--glass);
+            border: 2px solid #333;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.2);
+            animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        @keyframes popIn {
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* --- GLITCH PHOTO FRAME --- */
+        .frame-wrapper {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 20px;
+        }
+
+        .photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border: 5px solid var(--neon-green);
+            transition: 0.3s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .photo:hover {
+            transform: scale(1.05) rotate(2deg);
+            box-shadow: 10px 10px 0px var(--alert-orange);
+        }
+
+        .glitch-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--alert-orange);
+            z-index: 1;
+            transform: translate(10px, 10px);
+            animation: twitch 2s infinite;
+        }
+
+        @keyframes twitch {
+            0% { transform: translate(10px, 10px); }
+            5% { transform: translate(-5px, -5px); }
+            10% { transform: translate(10px, 10px); }
+            100% { transform: translate(10px, 10px); }
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1.glitch-text {
+            font-size: 5rem;
+            line-height: 0.9;
+            color: #fff;
+            position: relative;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 0px #333;
+        }
+
+        h1.glitch-text::before, h1.glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-bg);
+        }
+
+        h1.glitch-text::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00c1;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+
+        h1.glitch-text::after {
+            left: -2px;
+            text-shadow: -2px 0 #00fff9;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(12px, 9999px, 81px, 0); }
+            20% { clip: rect(65px, 9999px, 19px, 0); }
+            40% { clip: rect(32px, 9999px, 8px, 0); }
+            60% { clip: rect(91px, 9999px, 45px, 0); }
+            80% { clip: rect(4px, 9999px, 85px, 0); }
+            100% { clip: rect(52px, 9999px, 32px, 0); }
+        }
+        @keyframes glitch-anim2 {
+            0% { clip: rect(62px, 9999px, 11px, 0); }
+            20% { clip: rect(5px, 9999px, 79px, 0); }
+            40% { clip: rect(12px, 9999px, 38px, 0); }
+            60% { clip: rect(81px, 9999px, 25px, 0); }
+            80% { clip: rect(24px, 9999px, 55px, 0); }
+            100% { clip: rect(92px, 9999px, 12px, 0); }
+        }
+
+        .subtitle {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1.8rem;
+            color: var(--neon-green);
+            transform: rotate(-3deg);
+            margin-bottom: 20px;
+        }
+
+        /* --- STATS GRID --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+            font-family: 'VT323', monospace;
+        }
+
+        .stat-item {
+            border: 1px solid #333;
+            background: #000;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .stat-label { color: #888; font-size: 1.2rem; }
+        .stat-val { color: var(--neon-green); font-size: 1.8rem; font-weight: bold; }
+
+        /* --- MESSAGE --- */
+        /* --- MESSAGE --- */
+.brotherhood-msg {
+    font-family: 'Courier New', monospace;
+    text-align: justify; /* Keeps it square on desktop */
+    background: #111;
+    padding: 15px;
+    border-left: 4px solid var(--alert-orange);
+    margin-bottom: 20px;
+    font-weight: bold;
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+/* 📱 MOBILE FIX: Switches to left alignment on small screens to kill gaps */
+@media (max-width: 600px) {
+    .brotherhood-msg {
+        text-align: left; 
+        font-size: 0.9rem; /* Slightly smaller text for better fit */
+    }
+}
+
+        /* --- ACTION BUTTON --- */
+        .btn-chaos {
+            width: 100%;
+            padding: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            text-transform: uppercase;
+            cursor: pointer;
+            position: relative;
+            clip-path: polygon(10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%, 0 20%);
+            transition: 0.1s;
+        }
+
+        .btn-chaos:hover {
+            background: #fff;
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        /* --- CONFETTI & CHAOS ELEMENTS --- */
+        .confetti {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: var(--neon-green);
+            z-index: 2000;
+        }
+        
+        .flash-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+            /* Added transition for smooth fade out */
+            transition: opacity 0.5s ease-out;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="scanlines"></div>
+    <div class="bg-chaos"></div>
+    <div class="flash-overlay" id="flash"></div>
+
+    <div class="ticker-wrap">
+        <div class="ticker">
+            ⚠️ SYSTEM UPDATE: PRAFULL KA BHAUKAAL LOADING... // UP-WALE BHAIYA 🔫 // 7TH JAN // DO NOT MESS WITH THE BIRTHDAY BOY // KATTA MERE HAATH MEIN // 
+            ⚠️ SYSTEM UPDATE: PRAFULL KA BHAUKAAL LOADING... // UP-WALE BHAIYA 🔫 // 7TH JAN // DO NOT MESS WITH THE BIRTHDAY BOY // KATTA MERE HAATH MEIN // 
+        </div>
+    </div>
+
+    <div class="main-card">
+        
+        <div class="frame-wrapper">
+            <div class="glitch-layer"></div>
+            <img src="./image.png" alt="Prafull" class="photo" id="prafull-pic">
+        </div>
+
+        <h1 class="glitch-text" data-text="PRAFULL">PRAFULL</h1>
+        <div class="subtitle">"CHACHA VIDHAYAK HAIN HUMARE"</div>
+
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-label">LEVEL</div>
+                <div class="stat-val">BHAIYYA</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">STATUS</div>
+                <div class="stat-val">SINGLE (MAYBE)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">ATTITUDE</div>
+                <div class="stat-val">CHILLZ</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">DATE</div>
+                <div class="stat-val">07 JAN</div>
+            </div>
+        </div>
+
+        <div class="brotherhood-msg">
+    <span style="color:var(--neon-green)">> INITIATING BIRTHDAY PROTOCOL...</span><br><br>
+    Bhai, tu dost nahi <span style="text-decoration: underline; color: #fff;">kaleja</span> hai apna. 
+    Is saal system phaad dena hai. Bas 
+    <strong>BACKCHODI, GRIND, and KAMAI.</strong><br><br>
+    Happy Birthday Mere Bhai. 🥃
+</div>
+
+        <button class="btn-chaos" onclick="triggerSystemHang()">
+            ⚠️ PRESS TO HANG SYSTEM
+        </button>
+
+        <h2 id="final-msg" style="display:none; margin-top:20px; color:var(--alert-orange); font-size:3rem; transform: rotate(-5deg);">
+            SYSTUMMM PAAD DIYA!!
+        </h2>
+
+    </div>
+
+    <script>
+        // Global variables
+        let audio = null;
+        let isPartyActive = false;
+
+        // Function triggered on Button Click
+        function triggerSystemHang() {
+            // Prevent double triggers
+            if (isPartyActive) return;
+            isPartyActive = true;
+
+            // --- AUDIO LOGIC ---
+            audio = new Audio('song.mp3');
+            audio.loop = true; // Loop the music
+            audio.volume = 1.0;
+            audio.play().catch(e => console.log("User interaction needed for audio"));
+
+            // --- VISUAL LOGIC ---
+            const body = document.body;
+            const btn = document.querySelector('.btn-chaos');
+            const flash = document.getElementById('flash');
+            const finalMsg = document.getElementById('final-msg');
+
+            // 1. FLASH EFFECT (Improved)
+            flash.style.opacity = 1;
+            // Delay the fade out slightly so the flash is visible
+            setTimeout(() => {
+                flash.style.opacity = 0;
+            }, 50);
+
+            // 2. CHANGE BUTTON
+            btn.innerHTML = "LOADING BHAUKAAL...";
+            btn.style.background = "#fff";
+            
+            // 3. VIOLENT SHAKE
+            let shakeInterval = setInterval(() => {
+                let x = Math.random() * 20 - 10;
+                let y = Math.random() * 20 - 10;
+                body.style.transform = `translate(${x}px, ${y}px)`;
+            }, 50);
+
+            // 4. STOP SHAKE AND DROP CONFETTI AFTER 1s
+            setTimeout(() => {
+                clearInterval(shakeInterval);
+                body.style.transform = "translate(0,0)";
+                btn.style.display = 'none';
+                finalMsg.style.display = 'block';
+                startConfettiCannon();
+            }, 1000);
+        }
+
+        // --- PAGE VISIBILITY LOGIC ---
+        // This stops music when user leaves tab/minimizes, resumes when they return
+        document.addEventListener("visibilitychange", () => {
+            if (isPartyActive && audio) {
+                if (document.hidden) {
+                    audio.pause();
+                } else {
+                    audio.play();
+                }
+            }
+        });
+
+        function startConfettiCannon() {
+            // Intense confetti burst
+            for(let i=0; i<150; i++) {
+                createParticle();
+            }
+            // Ongoing
+            setInterval(createParticle, 50);
+        }
+
+        function createParticle() {
+            const p = document.createElement('div');
+            p.classList.add('confetti');
+            document.body.appendChild(p);
+
+            const colors = ['#0f0', '#ff3300', '#fff', '#ffff00', '#00ffff'];
+            p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.top = -10 + 'px';
+            
+            let speed = Math.random() * 2 + 1;
+            
+            let anim = p.animate([
+                { transform: `translateY(0) rotate(0deg)` },
+                { transform: `translateY(100vh) rotate(${Math.random()*720}deg)` }
+            ], {
+                duration: speed * 1000,
+                easing: 'linear'
+            });
+
+            anim.onfinish = () => p.remove();
+        }
+    </script>
+
+</body>
+</html>
